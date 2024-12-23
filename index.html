@@ -1,15 +1,80 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
-  </head>
-  <body>
-    <p>
-    My name is Rodion Rodionov and I own this domain. Contact me on
-    <a href="mailto:rodion@rodionov.fr">rodion@rodionov.fr</a>
-    </p>
-  </body>
-</html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infinite Falling Toast</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: linear-gradient(to bottom, #f9e7d2, #d6a671);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+        }
+
+        #toast {
+            position: absolute;
+            top: -200px;
+            width: 150px;
+            height: 150px;
+            background: url('https://i.imgur.com/q5x6rkT.png') no-repeat center/contain;
+        }
+
+        #topping {
+            position: absolute;
+            top: 30%;
+            left: 30%;
+            width: 40%;
+            height: 40%;
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translateY(-200px);
+            }
+            100% {
+                transform: translateY(110vh);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="toast">
+        <img id="topping" src="" alt="" />
+    </div>
+
+    <script>
+        const toast = document.getElementById("toast");
+        const topping = document.getElementById("topping");
+
+        const toppings = [
+            "https://i.imgur.com/f2px3Kf.png", // Butter
+            "https://i.imgur.com/dXs3SbT.png", // Jam
+            "https://i.imgur.com/kl0ZAWf.png", // Egg
+            "https://i.imgur.com/ZiFYvwF.png", // Shoe
+            "https://i.imgur.com/s5UlInq.png"  // Cactus
+        ];
+
+        function randomTopping() {
+            return toppings[Math.floor(Math.random() * toppings.length)];
+        }
+
+        function resetToast() {
+            const randomLeft = Math.random() * 100;
+            toast.style.left = `${randomLeft}vw`;
+            toast.style.animation = "fall 3s linear";
+            topping.src = randomTopping();
+
+            toast.addEventListener("animationend", () => {
+                toast.style.animation = "none";
+                setTimeout(resetToast, 200);
+            }, { once: true });
+        }
+
+        resetToast();
+    </script>
+</body>

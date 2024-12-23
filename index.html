@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cosmic Travel with Galaxies</title>
+    <title>4D Space Travel Visualization</title>
     <style>
         body {
             margin: 0;
@@ -19,119 +19,77 @@
 </head>
 
 <body>
-    <canvas id="cosmicCanvas"></canvas>
+    <canvas id="fourDCanvas"></canvas>
 
     <script>
-        const canvas = document.getElementById('cosmicCanvas');
+        const canvas = document.getElementById('fourDCanvas');
         const ctx = canvas.getContext('2d');
 
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
-        const stars = [];
-        const galaxies = [];
+        const elements = [];
+        const maxDepth = 500;
 
-        function randomStarColor() {
-            return `rgba(255, 255, 255, ${Math.random()})`;
+        // Function to generate pastel colors
+        function pastelColor() {
+            const hue = Math.random() * 360;
+            return `hsl(${hue}, 70%, 80%)`;
         }
 
-        function createStar() {
+        // Create elements with position, depth, and velocity
+        function createElement() {
+            const depth = Math.random() * maxDepth;
             return {
                 x: Math.random() * canvas.width - canvas.width / 2,
                 y: Math.random() * canvas.height - canvas.height / 2,
-                z: Math.random() * canvas.width,
-                originalZ: Math.random() * canvas.width,
-                speed: Math.random() * 0.002 + 0.003, // Slower star speed
-                color: randomStarColor(),
-                radius: Math.random() * 1.2 + 0.8
+                z: depth,
+                size: Math.random() * 4 + 1,
+                color: pastelColor(),
+                velocity: 0.01 + Math.random() * 0.005, // Slower movement
+                depth
             };
         }
 
-        function drawStar(star) {
-            const perspective = canvas.width / (canvas.width + star.z);
-            const x = (canvas.width / 2) + star.x * perspective;
-            const y = (canvas.height / 2) + star.y * perspective;
+        // Adjust element's position and draw it by projecting onto the canvas
+        function drawElement(element) {
+            const perspective = canvas.width / (canvas.width + element.z);
+            const x = (canvas.width / 2) + element.x * perspective;
+            const y = (canvas.height / 2) + element.y * perspective;
+            const size = element.size * perspective * 2;
 
-            ctx.save();
-            ctx.fillStyle = star.color;
+            ctx.fillStyle = element.color;
             ctx.beginPath();
-            ctx.arc(x, y, star.radius * perspective, 0, Math.PI * 2);
+            ctx.arc(x, y, size, 0, Math.PI * 2);
             ctx.fill();
-            ctx.restore();
         }
 
-        function createGalaxy() {
-            const x = Math.random() * canvas.width;
-            const y = Math.random() * canvas.height;
+        // Update elements to simulate forward movement through space
+        function updateElements() {
+            for (let i = 0; i < elements.length; i++) {
+                const element = elements[i];
+                element.z -= element.velocity * maxDepth;
 
-            return {
-                x,
-                y,
-                size: Math.random() * 200 + 300,
-                arms: Math.floor(Math.random() * 5) + 3,
-                color: `hsla(${Math.random() * 360}, 100%, 70%, 0.1)`,
-                rotation: Math.random() * 2 * Math.PI,
-                speed: Math.random() * 0.0002 + 0.0001 // Slower galaxy rotation speed
-            };
-        }
+                // Change size and color subtly
+                const normalizedDepth = 1 - (element.z / maxDepth);
+                element.size = 4 * normalizedDepth + 1;
 
-        function drawGalaxy(galaxy) {
-            ctx.save();
-            ctx.translate(galaxy.x, galaxy.y);
-            ctx.rotate(galaxy.rotation);
-
-            const spiralGradient = ctx.createRadialGradient(0, 0, 0, 0, 0, galaxy.size);
-            spiralGradient.addColorStop(0, galaxy.color);
-            spiralGradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
-
-            ctx.fillStyle = spiralGradient;
-            ctx.globalCompositeOperation = 'lighter';
-
-            for (let arm = 0; arm < galaxy.arms; arm++) {
-                ctx.rotate((Math.PI * 2) / galaxy.arms);
-                ctx.beginPath();
-                for (let i = 0; i < galaxy.size; i += 2) {
-                    const angle = Math.log(i + 1) * 0.5;
-                    const x = i * Math.cos(angle);
-                    const y = i * Math.sin(angle);
-                    ctx.lineTo(x, y);
-                }
-                ctx.stroke();
-            }
-
-            ctx.restore();
-
-            galaxy.rotation += galaxy.speed;
-        }
-
-        function updateStars() {
-            for (let i = 0; i < stars.length; i++) {
-                const star = stars[i];
-                star.z -= star.speed * canvas.width;
-
-                if (star.z < 1) {
-                    stars[i] = createStar();
-                    stars[i].z = canvas.width;
+                if (element.z < 1) {
+                    Object.assign(element, createElement(), { z: maxDepth });
                 }
             }
         }
 
         function loop() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            galaxies.forEach(drawGalaxy);
-            updateStars();
-            stars.forEach(drawStar);
-
+            updateElements();
+            elements.forEach(drawElement);
             requestAnimationFrame(loop);
         }
 
-        // Initialize stars and galaxies
-        for (let i = 0; i < 400; i++) {
-            stars.push(createStar());
-        }
-        for (let i = 0; i < 3; i++) {
-            galaxies.push(createGalaxy());
+        // Initialize elements
+        for (let i = 0; i < 300; i++) {
+            elements.push(createElement());
         }
 
         window.addEventListener('resize', () => {

@@ -3,79 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Infinite Falling Toast</title>
+    <title>Random Painting Generator</title>
     <style>
         body {
             margin: 0;
             overflow: hidden;
-            background: linear-gradient(to bottom, #f9e7d2, #d6a671);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            font-family: Arial, sans-serif;
+            background: black;
         }
 
-        #toast {
-            position: absolute;
-            top: -200px;
-            width: 150px;
-            height: 150px;
-            background: url('https://i.imgur.com/q5x6rkT.png') no-repeat center/contain;
-        }
-
-        #topping {
-            position: absolute;
-            top: 30%;
-            left: 30%;
-            width: 40%;
-            height: 40%;
-        }
-
-        @keyframes fall {
-            0% {
-                transform: translateY(-200px);
-            }
-            100% {
-                transform: translateY(110vh);
-            }
+        canvas {
+            display: block;
         }
     </style>
 </head>
 <body>
-    <div id="toast">
-        <img id="topping" src="" alt="" />
-    </div>
+    <canvas id="painting"></canvas>
 
     <script>
-        const toast = document.getElementById("toast");
-        const topping = document.getElementById("topping");
+        const canvas = document.getElementById('painting');
+        const ctx = canvas.getContext('2d');
 
-        const toppings = [
-            "https://i.imgur.com/f2px3Kf.png", // Butter
-            "https://i.imgur.com/dXs3SbT.png", // Jam
-            "https://i.imgur.com/kl0ZAWf.png", // Egg
-            "https://i.imgur.com/ZiFYvwF.png", // Shoe
-            "https://i.imgur.com/s5UlInq.png"  // Cactus
-        ];
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
 
-        function randomTopping() {
-            return toppings[Math.floor(Math.random() * toppings.length)];
+        function randomColor() {
+            return `rgba(${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, ${Math.random().toFixed(1)})`;
         }
 
-        function resetToast() {
-            const randomLeft = Math.random() * 100;
-            toast.style.left = `${randomLeft}vw`;
-            toast.style.animation = "fall 3s linear";
-            topping.src = randomTopping();
+        function randomShape() {
+            const x = Math.random() * canvas.width;
+            const y = Math.random() * canvas.height;
+            const width = Math.random() * 200 + 50;
+            const height = Math.random() * 200 + 50;
+            const radius = Math.random() * 100;
 
-            toast.addEventListener("animationend", () => {
-                toast.style.animation = "none";
-                setTimeout(resetToast, 200);
-            }, { once: true });
+            ctx.fillStyle = randomColor();
+            ctx.strokeStyle = randomColor();
+            ctx.lineWidth = Math.random() * 10;
+
+            const shapeType = Math.floor(Math.random() * 3);
+            switch (shapeType) {
+                case 0: // Rectangle
+                    ctx.fillRect(x, y, width, height);
+                    break;
+                case 1: // Circle
+                    ctx.beginPath();
+                    ctx.arc(x, y, radius, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                    break;
+                case 2: // Line
+                    ctx.beginPath();
+                    ctx.moveTo(x, y);
+                    ctx.lineTo(x + width, y + height);
+                    ctx.stroke();
+                    break;
+            }
         }
 
-        resetToast();
+        function generatePainting() {
+            for (let i = 0; i < 100; i++) {
+                randomShape();
+            }
+        }
+
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function refreshPainting() {
+            clearCanvas();
+            generatePainting();
+        }
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            refreshPainting();
+        });
+
+        // Initial Painting
+        generatePainting();
+
+        // Refresh every 5 seconds
+        setInterval(refreshPainting, 5000);
     </script>
 </body>
 </html>

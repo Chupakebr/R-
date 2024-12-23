@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Random Painting Generator</title>
+    <title>Space Movement Generator</title>
     <style>
         body {
             margin: 0;
@@ -26,67 +26,79 @@
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
+        const shapes = [];
+
         function randomColor() {
             return `rgba(${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, ${Math.random().toFixed(1)})`;
         }
 
-        function randomShape() {
-            const x = Math.random() * canvas.width;
-            const y = Math.random() * canvas.height;
-            const width = Math.random() * 200 + 50;
-            const height = Math.random() * 200 + 50;
-            const radius = Math.random() * 100;
+        function createShape() {
+            return {
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                size: Math.random() * 200 + 50,
+                speed: Math.random() * 5 + 1,
+                type: Math.floor(Math.random() * 3),
+                color: randomColor(),
+                stroke: randomColor(),
+                lineWidth: Math.random() * 10
+            };
+        }
 
-            ctx.fillStyle = randomColor();
-            ctx.strokeStyle = randomColor();
-            ctx.lineWidth = Math.random() * 10;
+        function drawShape(shape) {
+            ctx.fillStyle = shape.color;
+            ctx.strokeStyle = shape.stroke;
+            ctx.lineWidth = shape.lineWidth;
 
-            const shapeType = Math.floor(Math.random() * 3);
-            switch (shapeType) {
+            switch (shape.type) {
                 case 0: // Rectangle
-                    ctx.fillRect(x, y, width, height);
+                    ctx.fillRect(shape.x, shape.y, shape.size, shape.size);
                     break;
                 case 1: // Circle
                     ctx.beginPath();
-                    ctx.arc(x, y, radius, 0, Math.PI * 2);
+                    ctx.arc(shape.x, shape.y, shape.size / 2, 0, Math.PI * 2);
                     ctx.fill();
                     ctx.stroke();
                     break;
                 case 2: // Line
                     ctx.beginPath();
-                    ctx.moveTo(x, y);
-                    ctx.lineTo(x + width, y + height);
+                    ctx.moveTo(shape.x, shape.y);
+                    ctx.lineTo(shape.x + shape.size, shape.y + shape.size);
                     ctx.stroke();
                     break;
             }
         }
 
-        function generatePainting() {
-            for (let i = 0; i < 100; i++) {
-                randomShape();
+        function updateShapes() {
+            for (let i = 0; i < shapes.length; i++) {
+                shapes[i].y += shapes[i].speed;
+
+                // Reset shape when it moves out of view
+                if (shapes[i].y - shapes[i].size > canvas.height) {
+                    shapes[i] = createShape();
+                    shapes[i].y = -shapes[i].size;
+                }
             }
         }
 
-        function clearCanvas() {
+        function loop() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+            updateShapes();
+            shapes.forEach(drawShape);
+            requestAnimationFrame(loop);
         }
 
-        function refreshPainting() {
-            clearCanvas();
-            generatePainting();
+        // Create initial shapes
+        for (let i = 0; i < 100; i++) {
+            shapes.push(createShape());
         }
 
         window.addEventListener('resize', () => {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
-            refreshPainting();
         });
 
-        // Initial Painting
-        generatePainting();
-
-        // Refresh every 5 seconds
-        setInterval(refreshPainting, 5000);
+        loop();
     </script>
 </body>
 </html>

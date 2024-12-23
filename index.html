@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>5D Space Travel Visualization</title>
+    <title>Galaxy Simulation</title>
     <style>
         body {
             margin: 0;
@@ -19,16 +19,50 @@
 </head>
 
 <body>
-    <canvas id="fiveDCanvas"></canvas>
+    <canvas id="galaxyCanvas"></canvas>
 
     <script>
-        const canvas = document.getElementById('fiveDCanvas');
+        const canvas = document.getElementById('galaxyCanvas');
         const ctx = canvas.getContext('2d');
 
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
-        const elements = [];
+        const stars = [];
+        const numStars = 5500;
+        const centerX = canvas.width/2;
+        const centerY = canvas.height/2;
+
+        function createStar() {
+            const angle = Math.random() * 2 * Math.PI;
+            const radius = Math.sqrt(Math.random()) * (canvas.width / 2);
+            const cr = Math.random() * 3 + 1; // Circle radius
+            return {
+                x: centerX + radius * Math.cos(angle),
+                y: centerY + radius * Math.sin(angle),
+                angle: angle,
+                radius: radius,
+                cr: cr,
+                speed: (Math.random() * 0.01 + 0.01) * (canvas.width / 5000)
+            };
+        }
+
+        function drawStar(star) {
+            ctx.beginPath();
+            ctx.arc(star.x, star.y, star.cr, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(255, 255, 255, ${0.8 - (star.radius / (canvas.width / 2))})`;
+            ctx.fill();
+        }
+
+        function updateStars() {
+            for (const star of stars) {
+                star.angle += star.speed;
+                star.x = centerX + star.radius * Math.cos(star.angle);
+                star.y = centerY + star.radius * Math.sin(star.angle);
+            }
+        }
+
+                const elements = [];
         const maxDepth = 500;
 
         function createElement() {
@@ -77,20 +111,26 @@
             }
         }
 
+        
+
         function loop() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            updateElements();
-            elements.forEach(drawElement);
+            updateStars();
+            stars.forEach(drawStar);
             requestAnimationFrame(loop);
         }
 
-        for (let i = 0; i < 300; i++) {
-            elements.push(createElement());
+        for (let i = 0; i < numStars; i++) {
+            stars.push(createStar());
         }
 
         window.addEventListener('resize', () => {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
+            stars.length = 0;
+            for (let i = 0; i < numStars; i++) {
+                stars.push(createStar());
+            }
         });
 
         loop();

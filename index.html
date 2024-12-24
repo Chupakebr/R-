@@ -41,7 +41,7 @@
             const armAngle = (Math.random() * 2 - 1) * armSpread; // Random scatter along the arm
             const angle = Math.random() * Math.PI * 2 + Math.floor(Math.random() * numArms) * (Math.PI * 2 / numArms) + armAngle;
             const radius = Math.sqrt(Math.random()) * (canvas.width / 2); // Density falls off with distance
-            const cr = Math.random() * 3 + 1; // Circle radius
+            const cr = Math.random() * 2 + 1; // Circle radius
             const baseSpeed = (canvas.width / 1000000);
 
             // Simulate orbital velocity (faster near center, slower outward)

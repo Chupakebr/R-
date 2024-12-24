@@ -31,27 +31,36 @@
 
         const stars = [];
         const numStars = 5500;
-        const centerX = canvas.width/2;
-        const centerY = canvas.height/2;
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        const numArms = 4; // Number of spiral arms
+        const armSpread = 0.5; // Spread of stars around each arm
+        const rotationFactor = 2.5; // Rotation of arms
 
         function createStar() {
-            const angle = Math.random() * 2 * Math.PI;
-            const radius = Math.sqrt(Math.random()) * (canvas.width / 2);
+            const armAngle = (Math.random() * 2 - 1) * armSpread; // Random scatter along the arm
+            const angle = Math.random() * Math.PI * 2 + Math.floor(Math.random() * numArms) * (Math.PI * 2 / numArms) + armAngle;
+            const radius = Math.sqrt(Math.random()) * (canvas.width / 2); // Density falls off with distance
             const cr = Math.random() * 3 + 1; // Circle radius
+            const baseSpeed = (canvas.width / 1000000);
+
+            // Simulate orbital velocity (faster near center, slower outward)
+            const speed = baseSpeed * Math.sqrt((canvas.width / 2) / Math.max(radius, 5));
+
             return {
                 x: centerX + radius * Math.cos(angle),
                 y: centerY + radius * Math.sin(angle),
                 angle: angle,
                 radius: radius,
                 cr: cr,
-                speed: (Math.random() * 0.01 + 0.01) * (canvas.width / 5000)
+                speed: speed
             };
         }
 
         function drawStar(star) {
             ctx.beginPath();
             ctx.arc(star.x, star.y, star.cr, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(255, 255, 255, ${0.8 - (star.radius / (canvas.width / 2))})`;
+            ctx.fillStyle = `rgba(255, 255, 255, ${0.7 - (star.radius / (canvas.width / 2))})`;
             ctx.fill();
         }
 
@@ -62,57 +71,6 @@
                 star.y = centerY + star.radius * Math.sin(star.angle);
             }
         }
-
-                const elements = [];
-        const maxDepth = 500;
-
-        function createElement() {
-            return {
-                x: Math.random() * canvas.width - canvas.width / 2,
-                y: Math.random() * canvas.height - canvas.height / 2,
-                z: Math.random() * maxDepth,
-                w: Math.random() * maxDepth,
-                v: Math.random() * 2 + 0.5,
-                size: Math.random() * 4 + 1,
-                color: `hsl(${Math.random() * 360}, 70%, 70%)`
-            };
-        }
-
-        function drawElement(element) {
-            const perspective = canvas.width / (canvas.width + element.z);
-            const x = (canvas.width / 2) + element.x * perspective;
-            const y = (canvas.height / 2) + element.y * perspective;
-            const size = element.size * perspective;
-
-            ctx.save();
-            ctx.fillStyle = element.color;
-            ctx.globalAlpha = 0.5 + element.w / maxDepth; // Use fourth dimension to affect opacity
-            ctx.beginPath();
-            ctx.arc(x, y, size, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.restore();
-        }
-
-        function updateElements() {
-            for (let i = 0; i < elements.length; i++) {
-                const element = elements[i];
-                element.z -= element.v; // Move forward through "depth"
-                element.w -= element.v * 0.1; // Simulate change in an additional dimension
-
-                if (element.z < 1 || element.w < 1) {
-                    const newElement = createElement();
-                    element.x = newElement.x;
-                    element.y = newElement.y;
-                    element.z = maxDepth;
-                    element.w = maxDepth;
-                    element.v = newElement.v;
-                    element.size = newElement.size;
-                    element.color = newElement.color;
-                }
-            }
-        }
-
-        
 
         function loop() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
